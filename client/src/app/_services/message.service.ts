@@ -12,15 +12,23 @@ export class MessageService {
 
   constructor(private http: HttpClient) { }
 
-  getMessages(pageNumber,pageSize,container){
-    let params = getPaginationHeaders(pageNumber,pageSize);
+  getMessages(pageNumber, pageSize, container) {
+    let params = getPaginationHeaders(pageNumber, pageSize);
 
-    params = params.append('Container',container);
+    params = params.append('Container', container);
 
-    return getPaginationResults<Message[]>( this.baseUrl + 'messages',params,this.http);
+    return getPaginationResults<Message[]>(this.baseUrl + 'messages', params, this.http);
   }
 
-  getMessageThread(username:string){
+  getMessageThread(username: string) {
     return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username);
+  }
+
+  sendMessage(username: string, content: string) {
+    return this.http.post<Message>(this.baseUrl + 'messages', { recipientUserName: username, content });
+  }
+
+  deleteMessages(id: number) { 
+    return this.http.delete(this.baseUrl + 'messages/' + id);
   }
 }

@@ -34,7 +34,9 @@ namespace API.Data
 
         public async Task<Message> GetMessage(int id)
         {
-            return await _context.Messages.FindAsync(id);
+            return await _context.Messages.Include(u => u.Sender)
+                .Include(u => u.Recipient)
+                .SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<PagedList<MessageDTO>> GetMessagesForUser(MessageParams messageParams)
@@ -45,19 +47,19 @@ namespace API.Data
 
             query = messageParams.Container switch
             {
-                "Inbox" => query.Where(u => u.Recipient.UserName == messageParams.Username),
-                "Outbox" => query.Where(u => u.Sender.UserName == messageParams.Username),
-                _ => query.Where(u => u.Recipient.UserName == messageParams.Username && u.DateRead == null)
+                "Inbox" => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted == false),
+                "Outbox" => query.Where(u => u.Sender.UserName == messageParams.Username && u.SenderDeleted == false),
+                _ => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted == false && u.DateRead == null)
             };
 
             var messages = query.ProjectTo<MessageDTO>(_mapper.ConfigurationProvider);
 
-            return await PagedList<MessageDTO>.CreateAsync(messages,messageParams.PageNumber,messageParams.PageSize);
+            return await PagedList<MessageDTO>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
 
 
         }
 
-        public async Task<IEnumerable<MessageDTO>> GetMessagesThread(string currentUsername,string recepientUsername)
+        public async Task<IEnumerable<MessageDTO>> GetMessagesThread(string currentUsername, string recepientUsername)
         {
             var messages = await _context.Messages
                 .Include(u => u.Sender).ThenInclude(p => p.Photos)
