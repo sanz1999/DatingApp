@@ -37,14 +37,16 @@
                 [(ngModel)]="model.username"
                 class="form-control me-2" 
                 type="text" 
-                placeholder="Username" >
+                placeholder="Username" 
+                data-test="username">
           <input 
                 name = "password"
                 [(ngModel)]="model.password"
                 class="form-control me-2" 
                 type="password" 
-                placeholder="Password" >
-          <button class="btn btn-success" type="submit">Login</button>
+                placeholder="Password"
+                data-test="password" >
+          <button data-test="registerButton" class="btn btn-success" type="submit">Login</button>
         </form>
     </div>
     
